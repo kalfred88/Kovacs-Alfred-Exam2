@@ -20,6 +20,10 @@ body {
     margin-top: 10%;
 }
 
+.movie:nth-child(even) {
+    background: dodgerblue;
+}
+
 h2 {
     font-family: 'GameOfThrones';
     word-spacing: 10px;

@@ -33,7 +33,12 @@ function successAjax(xhttp) {
     createGrid(moviesData);
     document.getElementById('search').addEventListener('click', function () {
         searchingFor(moviesData);
-    })
+    });
+    document.getElementById('stats').addEventListener('click', function () {
+        getStats(moviesData);
+    });
+
+
 }
 
 
@@ -73,7 +78,7 @@ function createGrid(datas) {
     for (let i = 0; i < datas.length; i++) {
         let title = datas[i].title.removeShits();
         let div = document.createElement('div');
-        div.className = "movie col-xs-12 col-sm-6 col-md-4 col-lg-3";
+        div.className = "movie";
         div.innerHTML = `<img src="/movies/img/covers/${title}.jpg" alt="${title}">
         <p>Cím: ${datas[i].title}<br>
         Hossz: ${datas[i].timeInMinutes} perc<br>
@@ -163,4 +168,67 @@ function searchByActor(data, actor) {
     } else {
         createGrid(result);
     }
+}
+
+function getStats(data) {
+    let content = document.querySelector('.content');
+    let actorStats = actorMap(data);
+    let genreStats = genreMap(data);
+    let timeStats = getTimes(data);
+    content.innerHTML = timeStats + actorStats + genreStats;
+}
+
+function actorMap(data) {
+    let actorMap = new Map();
+    for (let i = 0; i < data.length; i++) {
+        for (let j = 0; j < data[i].cast.length; j++) {
+            if (actorMap.has(data[i].cast[j].name)) {
+                let currValue = actorMap.get(data[i].cast[j].name);
+                actorMap.set(data[i].cast[j].name, currValue + 1);
+            } else {
+                actorMap.set(data[i].cast[j].name, 1);
+            }
+        }
+    }
+    let actorStats = "";
+    for (let i of actorMap) {
+        actorStats += (`<p>${i[0]} filmjeinek száma az adatbázisban: ${i[1]}</p>`);
+    }
+    return actorStats;
+}
+
+function genreMap(data) {
+    let genreMap = new Map();
+    for (let i = 0; i < data.length; i++) {
+        for (let j = 0; j < data[i].categories.length; j++) {
+            if (genreMap.has(data[i].categories[j])) {
+                let currValue = genreMap.get(data[i].categories[j]);
+                genreMap.set(data[i].categories[j], currValue + 1);
+            } else {
+                genreMap.set(data[i].categories[j], 1);
+            }
+        }
+    }
+    let genreStats = "";
+    for (let i of genreMap) {
+        genreStats += (`<p> A(z) ${i[0]} kategóriájú filmek száma az adatbázisban: ${i[1]}</p>`);
+    }
+    return genreStats;
+}
+
+function getTimes(data) {
+    let totalTime = 0;
+    let count = 0;
+
+    for (let i = 0; i < data.length; i++) {
+        totalTime += parseInt(data[i].timeInMinutes);
+        count++;
+    }
+    let avgTime = (totalTime / count / 60).toFixed(2);
+    totalTime = (totalTime / 60).toFixed(2);
+
+    let timeStats = `<p>Az filmek összhossza: ${totalTime} óra<br>
+    A filmek átlagos hossza: ${avgTime} óra.</p>`;
+
+    return timeStats
 }
