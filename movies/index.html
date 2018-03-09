@@ -10,13 +10,18 @@
 </head>
 
 <body>
-    <div class="search">
-
+    <div class="searchingFor">
+        <h2>Movies we like</h2>
+        <select name="searchBy" id="searchBy">
+            <option value="title">Cím</option>
+            <option value="name">Szereplő</option>
+            <option value="directors">Rendező</option>
+        </select>
+        <input type="text" name="keyword" id="keyword">
+        <button id="search">Search</button>
     </div>
-    <div class="container">
-        <div class="content">
+    <div class="content">
 
-        </div>
     </div>
     <script src="/movies/js/movies.js"></script>
 </body>

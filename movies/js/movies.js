@@ -20,7 +20,8 @@ String.prototype.removeShits = function () {
         .toLocaleLowerCase()
         .replace(/[\?:;,\.\+\*\!\&/]/g, '')
         .replace(/[áéíóöőúüű]/g, c => hunChars[c])
-        .replace(/ +/g, '-');
+        .replace(/ +/g, '-')
+        .replace(/-+/g, '-');
 }
 
 function successAjax(xhttp) {
@@ -30,6 +31,9 @@ function successAjax(xhttp) {
     sortByTitle(moviesData);
     categoryNames(moviesData);
     createGrid(moviesData);
+    document.getElementById('search').addEventListener('click', function () {
+        searchingFor(moviesData);
+    })
 }
 
 
@@ -65,20 +69,17 @@ function categoryNames(data) {
 
 function createGrid(datas) {
     let content = document.querySelector('.content');
-
+    content.innerHTML = "";
     for (let i = 0; i < datas.length; i++) {
         let title = datas[i].title.removeShits();
         let div = document.createElement('div');
-        /*let poster = document.createElement('img');
-        poster.src = `/movies/img/covers/${title}.jpg`;
-        poster.alt = title;*/
-        div.className = "movie";
+        div.className = "movie col-xs-12 col-sm-6 col-md-4 col-lg-3";
         div.innerHTML = `<img src="/movies/img/covers/${title}.jpg" alt="${title}">
-        <p>Cím: ${datas[i].title}</p>
-        <p>Hossz: ${datas[i].timeInMinutes} perc</p>
-        <p>Premier: ${datas[i].premierYear}</p>
-        <p>Kategória: ${datas[i].categories.join(', ')}</p>
-        <p>Rendező(k): ${datas[i].directors.join(', ')}</p>
+        <p>Cím: ${datas[i].title}<br>
+        Hossz: ${datas[i].timeInMinutes} perc<br>
+        Premier: ${datas[i].premierYear}<br>
+        Kategória: ${datas[i].categories.join(', ')}<br>
+        Rendező(k): ${datas[i].directors.join(', ')}</p>
         <div class="cast">Szereplők: ${showCast(datas[i].cast)}</div>`;
 
         content.appendChild(div);
@@ -86,10 +87,80 @@ function createGrid(datas) {
 }
 
 function showCast(cast) {
-
     let element = "";
     for (let i = 0; i < cast.length; i++) {
-        element += `<p>${cast[i].name} (${cast[i].characterName})\n ${cast[i].birthYear}, ${cast[i].birthCountry}, ${cast[i].birthCity}</p>`;
+        let portrait = cast[i].name.removeShits();
+        element += `<div class="castpic">
+        <img src="/movies/img/actors/${portrait}.jpg" alt="${cast[i].name}"><br>
+        ${cast[i].name} (${cast[i].characterName})<br>
+        ${cast[i].birthYear}, ${cast[i].birthCountry}, ${cast[i].birthCity}</div>`;
     }
     return element;
+}
+
+function searchingFor(data) {
+    let attr = document.getElementById('searchBy').value;
+    let keyword = document.getElementById('keyword').value.toLowerCase();
+    console.log(keyword);
+    switch (attr) {
+        case "name":
+            searchByActor(data, keyword);
+            break;
+        case "directors":
+
+            searchByDirector(data, keyword);
+            break;
+        case "title":
+            searchByTitle(data, keyword);
+            break;
+
+        default:
+            content.innerHTML = `<h1 class="error">Bubuka, valamit nem jól csinálsz!</h1>`;
+            break;
+    }
+}
+
+function searchByTitle(data, title) {
+    let content = document.querySelector('.content');
+    for (let i = 0; i < data.length; i++) {
+        if (data[i].title.toLowerCase() == title) {
+            let result = [];
+            result.push(data[i]);
+            createGrid(result);
+            break;
+        } else {
+            content.innerHTML = `<h1 class="error">Nincs ilyen film az adatbázisban!</h1>`;
+        }
+    }
+}
+
+function searchByDirector(data, director) {
+    let content = document.querySelector('.content');
+    for (let i = 0; i < data.length; i++) {
+        if (data[i].directors.map(name => name.toLowerCase()).includes(director)) {
+            let result = [];
+            result.push(data[i]);
+            createGrid(result);
+            break;
+        } else {
+            content.innerHTML = `<h1 class="error">Nincs ilyen film az adatbázisban!</h1>`;
+        }
+    }
+}
+
+function searchByActor(data, actor) {
+    let content = document.querySelector('.content');
+    let result = [];
+    for (let i = 0; i < data.length; i++) {
+        for (let j = 0; j < data[i].cast.length; j++) {
+            if (data[i].cast[j].name.toLowerCase() == actor) {
+                result.push(data[i]);
+            }
+        }
+    }
+    if (result.length == 0) {
+        content.innerHTML = `<h1 class="error">Nincs ilyen film az adatbázisban!</h1>`;
+    } else {
+        createGrid(result);
+    }
 }
